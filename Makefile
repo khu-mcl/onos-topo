@@ -8,7 +8,6 @@ export GO111MODULE=on
 
 .PHONY: build
 TARGET := onos-topo
-TARGET_TEST := onos-topo-test
 DOCKER_TAG ?= latest
 PLATFORM ?= --platform linux/x86_64
 
@@ -30,7 +29,7 @@ mod-lint: mod-update # @HELP ensure that the required dependencies are in place
 
 test: # @HELP run the unit tests and source code validation producing a golang style report
 test: mod-lint build linters license
-	go test -race github.com/onosproject/${TARGET}/...
+	go test -race ./... #go test -race github.com/onosproject/${TARGET}/...
 
 #jenkins-test: # @HELP run the unit tests and source code validation producing a junit style report for Jenkins
 #jenkins-test: mod-lint build linters license
