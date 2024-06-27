@@ -7,13 +7,14 @@ export CGO_ENABLED=1
 export GO111MODULE=on
 
 .PHONY: build
-
-ONOS_TOPO_VERSION := latest
+TARGET := onos-topo
+TARGET_TEST := onos-topo-test
+DOCKER_TAG ?= latest
 PLATFORM ?= --platform linux/x86_64
 
 build: # @HELP build the Go binaries and run all validations (default)
 build:
-	CGO_ENABLED=1 go build -o build/_output/onos-topo ./cmd/onos-topo
+	CGO_ENABLED=1 go build -o build/_output/${TARGET} ./cmd/${TARGET}
 	go build -o build/_output/topo-generator ./cmd/topo-generator
 	go build -o build/_output/topo-visualizer ./cmd/topo-visualizer
 
@@ -29,41 +30,41 @@ mod-lint: mod-update # @HELP ensure that the required dependencies are in place
 
 test: # @HELP run the unit tests and source code validation producing a golang style report
 test: mod-lint build linters license
-	go test -race github.com/onosproject/onos-topo/...
+	go test -race github.com/onosproject/${TARGET}/...
 
-jenkins-test: # @HELP run the unit tests and source code validation producing a junit style report for Jenkins
-jenkins-test: mod-lint build linters license
-	TEST_PACKAGES=github.com/onosproject/onos-topo/pkg/... ./build/build-tools/build/jenkins/make-unit
+#jenkins-test: # @HELP run the unit tests and source code validation producing a junit style report for Jenkins
+#jenkins-test: mod-lint build linters license
+	TEST_PACKAGES=github.com/onosproject/${TARGET}/pkg/... ./build/build-tools/build/jenkins/make-unit
 
 helmit-topo: integration-test-namespace # @HELP run helmit gnmi tests locally
 	make helmit-topo -C test
 
 integration-tests: helmit-topo
 
-onos-topo-docker: # @HELP build onos-topo base Docker image
+docker-build: # @HELP build onos-topo base Docker image
 	@go mod vendor
-	docker build ${PLATFORM} . -f build/onos-topo/Dockerfile \
-		-t onosproject/onos-topo:${ONOS_TOPO_VERSION}
+	docker build ${PLATFORM} . -f build/${TARGET}/Dockerfile \
+		-t ${DOCKER_REPOSITORY}${TARGET}:${DOCKER_TAG}
 	@rm -rf vendor
 
 images: # @HELP build all Docker images
-images: build onos-topo-docker
+images: build docker-build
 
 kind: # @HELP build Docker images and add them to the currently configured kind cluster
 kind: images
 	@if [ "`kind get clusters`" = '' ]; then echo "no kind cluster found" && exit 1; fi
-	kind load docker-image onosproject/onos-topo:${ONOS_TOPO_VERSION}
+	kind load docker-image ${DOCKER_REPOSITORY}${TARGET}:${DOCKER_TAG}
 
 all: build images
 
 publish: # @HELP publish version on github and dockerhub
-	./build/build-tools/publish-version ${VERSION} onosproject/onos-topo
+	./build/build-tools/publish-version ${VERSION} ${DOCKER_REPOSITORY}${TARGET}
 
-jenkins-publish: jenkins-tools # @HELP Jenkins calls this to publish artifacts
-	./build/bin/push-images
-	./build/build-tools/release-merge-commit
-	./build/build-tools/build/docs/push-docs
+#jenkins-publish: jenkins-tools # @HELP Jenkins calls this to publish artifacts
+#	./build/bin/push-images
+#	./build/build-tools/release-merge-commit
+#	./build/build-tools/build/docs/push-docs
 
 clean:: # @HELP remove all the build artifacts
-	rm -rf ./build/_output ./vendor ./cmd/onos-topo/onos-topo ./cmd/dummy/dummy
+	rm -rf ./build/_output ./vendor ./cmd/${TARGET}/${TARGET} ./cmd/dummy/dummy
 
