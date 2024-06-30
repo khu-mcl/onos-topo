@@ -126,7 +126,7 @@ a simple force layout graph. This allows the view to dynamically adjust to refle
 Clicking on nodes (entities) and links (relations) will show the full contents of the entity or relation 
 as JSON structure. Nodes can be dragged around and the entire graph can be zoomed and panned within the viewport.
 
-The visualizer is presently under active development.
+The visualizer is presently under active development. 
 
 ## See Also
 * [Deployment](docs/deployment.md)
