@@ -34,7 +34,7 @@ test: mod-lint build linters license
 
 #jenkins-test: # @HELP run the unit tests and source code validation producing a junit style report for Jenkins
 #jenkins-test: mod-lint build linters license
-	TEST_PACKAGES=github.com/onosproject/${TARGET}/pkg/... ./build/build-tools/build/jenkins/make-unit
+#	TEST_PACKAGES=github.com/onosproject/${TARGET}/pkg/... ./build/build-tools/build/jenkins/make-unit
 
 helmit-topo: integration-test-namespace # @HELP run helmit gnmi tests locally
 	make helmit-topo -C test
