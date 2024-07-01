@@ -39,7 +39,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
       - name: Unit tests
-        run: make test #go test -race ./...
+        run: make test
 
   docker-build:
     runs-on: ubuntu-latest
